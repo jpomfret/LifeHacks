@@ -16,4 +16,4 @@ Find my lifehacks videos on:
 ## Live LifeHacks
 
 ### dbatools
-- 01 - [Easily migrate databases](./scripts/01_dbatools_MigrateDatabase.ps1)
+- 01 - [Easily migrate databases](./Scripts/01_dbatools_MigrateDatabase.ps1)
