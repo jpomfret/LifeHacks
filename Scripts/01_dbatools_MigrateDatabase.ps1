@@ -4,23 +4,12 @@
 #                                        #
 ##########################################
 
-<# pre stream
-- 00_setup.ps1
-- create logins
-- open ads and connect to mssql1
-- change OBS to capture screen rather than vscode app!
-#>
-
 # 1. Check for processes
 # 2. Copy logins
 # 3. Copy database
 
 # migrating application databases with dbatools
 # https://dbatools.io/migrating-application-dbs/
-
-
-
-
 
 ## 1. Processes
 
@@ -39,7 +28,7 @@
         SqlInstance = 'mssql1'
         ExcludeSystemLogin = $true
         ExcludeFilter =  'NT AUTH*', 'BUI*', '##*'
-        OutVariable = 'loginsToMigrate' # OutVariable to also capture this to use later
+        OutVariable = 'loginsToMigrate'             # OutVariable to also capture this to use later
     }
     Get-DbaLogin @loginSplat |
         Select-Object SqlInstance, Name, LoginType

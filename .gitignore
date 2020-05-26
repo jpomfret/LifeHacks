@@ -1,0 +1,2 @@
+# Ignore database files
+Scripts/Setup/Docker/mssql1/AdventureWorks/*

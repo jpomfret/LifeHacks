@@ -17,3 +17,16 @@ Find my lifehacks videos on:
 
 ### dbatools
 - 01 - [Easily migrate databases](./Scripts/01_dbatools_MigrateDatabase.ps1)
+
+### Ideas for future hacks
+If there is something you'd like to see me cover create an issue and I'll see what I can do.
+
+Ideas I have:
+- Git
+    - Getting started with dbatools - fork, clone, create a feature branch
+    - Rebasing branch when upstream changed
+
+- dbatools
+    - Export-DbaInstance - easy environment documentation
+    - Write-DbaDataTable
+
