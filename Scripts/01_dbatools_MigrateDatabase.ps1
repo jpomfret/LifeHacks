@@ -1,90 +1,99 @@
-##########################################
-#                                        #
-#  01 - Migrate Databases with dbatools  #
-#                                        #
-##########################################
+############################
+#                          #
+# Easy Database Migrations #
+#                          #
+############################
 
-# 1. Check for processes
-# 2. Copy logins
-# 3. Copy database
+# Explore available copy commands
+# Get Databases & Logins
+# Migrate Databases
+# Migrate Logins
+# Upgrade databases
 
 # migrating application databases with dbatools
 # https://dbatools.io/migrating-application-dbs/
 
-## 1. Processes
+# Copy commands available in dbatools
+Get-Command -Module dbatools -Verb Copy
 
-    $processSplat = @{
-        SqlInstance = "mssql1"
-        Database    = "AdventureWorks2017","DatabaseAdmin"
-    }
-    Get-DbaProcess @processSplat |
-        Select-Object Host, login, Program
+## Get databases
+$datatbaseSplat = @{
+    SqlInstance   = "mssql1"
+    ExcludeSystem = $true
+    OutVariable   = "dbs"        # OutVariable to also capture this to use later
+}
+Get-DbaDatabase @datatbaseSplat |
+    Select-Object Name, Status, RecoveryModel, Owner, Compatibility |
+    Format-Table
 
-    Get-DbaProcess @processSplat | Stop-DbaProcess
+# Get Logins
+$loginSplat = @{
+    SqlInstance = "mssql1"
+}
+Get-DbaLogin @loginSplat |
+    Select-Object SqlInstance, Name, LoginType
 
-## 2. Logins
+# Get Processes
+$processSplat = @{
+    SqlInstance = "mssql1"
+    Database    = $dbs.name
+}
+Get-DbaProcess @processSplat |
+    Select-Object Host, login, Program
 
-    $loginSplat = @{
-        SqlInstance = 'mssql1'
-        ExcludeSystemLogin = $true
-        ExcludeFilter =  'NT AUTH*', 'BUI*', '##*'
-        OutVariable = 'loginsToMigrate'             # OutVariable to also capture this to use later
-    }
-    Get-DbaLogin @loginSplat |
-        Select-Object SqlInstance, Name, LoginType
+# Kill Processes
+Get-DbaProcess @processSplat | Stop-DbaProcess
 
-    ## Migrate login
-    $migrateLoginSplat = @{
-        Source      = 'mssql1'
-        Destination = 'mssql2'
-        Login       = $loginsToMigrate.Name
-        Verbose     = $true
-    }
-    Copy-DbaLogin @migrateLoginSplat
+## Migrate the databases
+$migrateDbSplat = @{
+    Source        = "mssql1"
+    Destination   = 'mssql2'
+    Database      = $dbs.name
+    BackupRestore = $true
+    SharedPath    = '/sharedpath'
+    #SetSourceOffline        = $true
+    Verbose       = $true
+}
+Copy-DbaDatabase @migrateDbSplat
 
-## 2. Databases
+## Migrate login
+$migrateLoginSplat = @{
+    Source      = "mssql1"
+    Destination = 'mssql2'
+    Login       = "JessP"
+    Verbose     = $true
+}
+Copy-DbaLogin @migrateLoginSplat
 
-    $datatbaseSplat = @{
-        SqlInstance   = "mssql1"
-        ExcludeSystem = $true
-        OutVariable   = "dbs"        # OutVariable to also capture this to use later
-    }
-    Get-DbaDatabase @datatbaseSplat |
-        Select-Object Name, Status, RecoveryModel, Owner, Compatibility |
-        Format-Table
+## Set source dbs offline
+$offlineSplat = @{
+    SqlInstance = "mssql1"
+    Database    = "AdventureWorks2017", "DatabaseAdmin"
+    Offline     = $true
+    Force       = $true
+}
+Set-DbaDbState @offlineSplat
 
-    ## Migrate the databases
-    $migrateDbSplat = @{
-        Source           = "mssql1"
-        Destination      = 'mssql2'
-        Database         = $dbs.name
-        BackupRestore    = $true
-        SharedPath       = '/sharedpath'
-        SetSourceOffline = $true
-        Verbose          = $true
-    }
-    Copy-DbaDatabase @migrateDbSplat
+## upgrade compat level & check all is ok
+$compatSplat = @{
+    SqlInstance = "mssql2"
+}
+Get-DbaDbCompatibility @compatSplat |
+    Select-Object SqlInstance, Database, Compatibility
 
-    ## upgrade compat level & check all is ok
-    $compatSplat = @{
-        SqlInstance = "mssql2"
-    }
-    Get-DbaDbCompatibility @compatSplat |
-        Select-Object SqlInstance, Database, Compatibility
+$compatSplat.Add('Database', 'DatabaseAdmin')
+$compatSplat.Add('TargetCompatibility', '15')
 
-    $compatSplat.Add('Database', $dbs.Name)
-    $compatSplat.Add('TargetCompatibility', '15')
+Set-DbaDbCompatibility @compatSplat
 
-    Set-DbaDbCompatibility @compatSplat
-
-    ## Upgrade database - https://thomaslarock.com/2014/06/upgrading-to-sql-server-2014-a-dozen-things-to-check/
-    # Updates compatibility level
-    # runs CHECKDB with data_purity - make sure column values are in range, e.g. datetime
-    # DBCC updateusage
-    # sp_updatestats
-    # sp_refreshview against all user views
-    $upgradeSplat = @{
-        SqlInstance = "mssql2"
-        Database    = $dbs.Name
-    }
-    Invoke-DbaDbUpgrade @upgradeSplat
+## Upgrade database - https://thomaslarock.com/2014/06/upgrading-to-sql-server-2014-a-dozen-things-to-check/
+# Updates compatibility level
+# runs CHECKDB with data_purity - make sure column values are in range, e.g. datetime
+# DBCC updateusage
+# sp_updatestats
+# sp_refreshview against all user views
+$upgradeSplat = @{
+    SqlInstance = "mssql2"
+    Database    = "DatabaseAdmin"
+}
+Invoke-DbaDbUpgrade @upgradeSplat

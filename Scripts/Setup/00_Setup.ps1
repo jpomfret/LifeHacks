@@ -1,6 +1,6 @@
-Get-Process teams, slack -ErrorAction SilentlyContinue | Stop-Process -ErrorAction SilentlyContinue
+#Get-Process teams, slack -ErrorAction SilentlyContinue | Stop-Process -ErrorAction SilentlyContinue
 
-Start-Process azuredatastudio
+#Start-Process azuredatastudio
 
 Set-Location C:\github\LifeHacks
 
