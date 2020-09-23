@@ -8,6 +8,7 @@ I'll try and keep the below list up-to-date with links to my videos and scripts.
 
 Find me on:
 - [Twitter](https://twitter.com/jpomfret)
+- [LinkedIn](https://www.linkedin.com/in/jpomfret/)
 
 Find my lifehacks videos on:
 - [YouTube](https://www.youtube.com/channel/UC0D3eA_natUs91YcuPE_tLg)
@@ -17,6 +18,7 @@ Find my lifehacks videos on:
 
 ### dbatools
 - 01 - [Easily migrate databases](./Scripts/01_dbatools_MigrateDatabase.ps1)
+- 02 - [Glenn's Diagnostic Queries & dbatools](./Scripts/02_dbatools_DiagnosticQueries.ps1)
 
 ### Ideas for future hacks
 If there is something you'd like to see me cover create an issue and I'll see what I can do.
